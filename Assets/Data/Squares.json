@@ -1,0 +1,268 @@
+﻿[
+  {
+    "id": 0,
+    "squareName": "Start",
+    "action": 0
+  },
+  {
+    "id": 1,
+    "squareName": "MediterRanean Avenue",
+    "cost": 60,
+    "streetColor": "Brown",
+    "mortgage": 30,
+    "rentPerHouse": [ 2, 10, 30, 90, 160, 250 ]
+  },
+  {
+    "id": 2,
+    "squareName": "Community Chest",
+    "action": 3
+  },
+  {
+    "id": 3,
+    "squareName": "Baltic Avenue",
+    "cost": 60,
+    "streetColor": "Brown",
+    "mortgage": 30,
+    "rentPerHouse": [ 4, 20, 60, 180, 320, 450 ]
+  },
+  {
+    "id": 4,
+    "squareName": "Income Tax",
+    "action": 6
+  },
+  {
+    "id": 5,
+    "squareName": "Reading Railroad",
+    "streetColor": "Trains"
+  },
+  {
+    "id": 6,
+    "squareName": "Oriental Avenue",
+    "cost": 100,
+    "streetColor": "Cyan",
+    "mortgage": 50,
+    "rentPerHouse": [ 6, 30, 90, 270, 400, 550 ]
+  },
+  {
+    "id": 7,
+    "squareName": "Chance",
+    "action": 1
+  },
+  {
+    "id": 8,
+    "squareName": "Vermont Avenue",
+    "cost": 100,
+    "streetColor": "Cyan",
+    "mortgage": 50,
+    "rentPerHouse": [ 6, 30, 90, 270, 400, 550 ]
+  },
+  {
+    "id": 9,
+    "squareName": "Connecticut Avenue",
+    "cost": 120,
+    "streetColor": "Cyan",
+    "mortgage": 60,
+    "rentPerHouse": [ 8, 40, 100, 300, 450, 600 ]
+  },
+  {
+    "id": 10,
+    "squareName": "Jail",
+    "action": 3
+  },
+  {
+    "id": 11,
+    "squareName": "St. Charles Place",
+    "cost": 140,
+    "streetColor": "Pink",
+    "mortgage": 70,
+    "rentPerHouse": [ 10, 50, 150, 450, 625, 750 ]
+  },
+  {
+    "id": 12,
+    "squareName": "Electric Company",
+    "streetColor": "Utility"
+  },
+  {
+    "id": 13,
+    "squareName": "States Avenue",
+    "cost": 140,
+    "streetColor": "Pink",
+    "mortgage": 70,
+    "rentPerHouse": [ 10, 50, 150, 450, 625, 750 ]
+  },
+  {
+    "id": 14,
+    "squareName": "Virginia Avenue",
+    "cost": 160,
+    "streetColor": "Pink",
+    "mortgage": 80,
+    "rentPerHouse": [ 12, 60, 180, 500, 700, 900 ]
+  },
+  {
+    "id": 15,
+    "squareName": "Pennsylvania Railroad",
+    "streetColor": "Trains"
+  },
+  {
+    "id": 16,
+    "squareName": "St. James Place",
+    "cost": 180,
+    "streetColor": "Orange",
+    "mortgage": 90,
+    "rentPerHouse": [ 14, 70, 200, 550, 750, 950 ]
+  },
+  {
+    "id": 17,
+    "squareName": "Community Chest",
+    "action": 3
+  },
+  {
+    "id": 18,
+    "squareName": "Tennessee Avenue",
+    "cost": 180,
+    "streetColor": "Orange",
+    "mortgage": 90,
+    "rentPerHouse": [ 14, 70, 200, 550, 750, 950 ]
+  },
+  {
+    "id": 19,
+    "squareName": "New York Avenue",
+    "cost": 200,
+    "streetColor": "Orange",
+    "mortgage": 100,
+    "rentPerHouse": [ 16, 80, 220, 600, 800, 1000 ]
+  },
+  {
+    "id": 20,
+    "squareName": "Free Parking",
+    "action": 4
+  },
+  {
+    "id": 21,
+    "squareName": "Kentucky Avenue",
+    "cost": 220,
+    "streetColor": "Red",
+    "mortgage": 110,
+    "rentPerHouse": [ 18, 90, 250, 700, 875, 1050 ]
+  },
+  {
+    "id": 22,
+    "squareName": "Chance",
+    "action": 1
+  },
+  {
+    "id": 23,
+    "squareName": "Indiana Avenue",
+    "cost": 220,
+    "streetColor": "Red",
+    "mortgage": 110,
+    "rentPerHouse": [ 18, 90, 250, 700, 875, 1050 ]
+  },
+  {
+    "id": 24,
+    "squareName": "Illinois Avenue",
+    "cost": 240,
+    "streetColor": "Red",
+    "mortgage": 120,
+    "rentPerHouse": [ 20, 100, 300, 750, 925, 1100 ]
+  },
+  {
+    "id": 25,
+    "squareName": "B&O Railroad",
+    "streetColor": "Trains"
+  },
+  {
+    "id": 26,
+    "squareName": "Atlantic Avenue",
+    "cost": 260,
+    "streetColor": "Yellow",
+    "mortgage": 130,
+    "rentPerHouse": [ 22, 110, 330, 800, 975, 1150 ]
+  },
+  {
+    "id": 27,
+    "squareName": "Ventnor Avenue",
+    "cost": 260,
+    "streetColor": "Yellow",
+    "mortgage": 130,
+    "rentPerHouse": [ 22, 110, 330, 800, 975, 1150 ]
+  },
+  {
+    "id": 28,
+    "squareName": "Water Works",
+    "streetColor": "Utility"
+  },
+  {
+    "id": 29,
+    "squareName": "Marvin  Gardens",
+    "cost": 280,
+    "streetColor": "Yellow",
+    "mortgage": 140,
+    "rentPerHouse": [ 24, 120, 360, 850, 1025, 1200 ]
+  },
+  {
+    "id": 30,
+    "squareName": "Go To Jail",
+    "action": 5
+  },
+  {
+    "id": 31,
+    "squareName": "Pacific Avenue",
+    "cost": 300,
+    "streetColor": "Green",
+    "mortgage": 150,
+    "rentPerHouse": [ 26, 130, 390, 900, 1100, 1275 ]
+  },
+  {
+    "id": 32,
+    "squareName": "North Carolina Avenue",
+    "cost": 300,
+    "streetColor": "Green",
+    "mortgage": 150,
+    "rentPerHouse": [ 26, 130, 390, 900, 1100, 1275 ]
+  },
+  {
+    "id": 33,
+    "squareName": "Community Chest",
+    "action": 3
+  },
+  {
+    "id": 34,
+    "squareName": "Pennsylvania Avenue",
+    "cost": 320,
+    "streetColor": "Green",
+    "mortgage": 160,
+    "rentPerHouse": [ 28, 150, 450, 1000, 1200, 1400 ]
+  },
+  {
+    "id": 35,
+    "squareName": "Short Line Railroad",
+    "streetColor": "Trains"
+  },
+  {
+    "id": 36,
+    "squareName": "Chance",
+    "action": 1
+  },
+  {
+    "id": 37,
+    "squareName": "Park Place",
+    "cost": 350,
+    "streetColor": "Blue",
+    "mortgage": 175,
+    "rentPerHouse": [ 35, 175, 500, 1100, 1300, 1500 ]
+  },
+  {
+    "id": 38,
+    "squareName": "Luxury Tax",
+    "action": 7
+  },
+  {
+    "id": 39,
+    "squareName": "Boardwalk",
+    "cost": 400,
+    "streetColor": "Blue",
+    "mortgage": 200,
+    "rentPerHouse": [ 50, 200, 600, 1400, 1700, 2000 ]
+  }
+]

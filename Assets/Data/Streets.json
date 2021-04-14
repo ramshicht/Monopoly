@@ -1,0 +1,41 @@
+﻿[
+  {
+    "color": "Brown",
+    "housePrice": 50
+  },
+  {
+    "color": "Cyan",
+    "housePrice": 50
+  },
+  {
+    "color": "Pink",
+    "housePrice": 100
+  },
+  {
+    "color": "Orange",
+    "housePrice": 100
+  },
+  {
+    "color": "Red",
+    "housePrice": 150
+  },
+  {
+    "color": "Yellow",
+    "housePrice": 150
+  },
+  {
+    "color": "Green",
+    "housePrice": 200
+  },
+  {
+    "color": "Blue",
+    "housePrice": 200
+  },
+  {
+    "color": "Trains"
+  },
+  {
+    "color": "Utility"
+  }
+
+]
