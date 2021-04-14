@@ -112,6 +112,7 @@ namespace Assets.Script
         protected int mortgageCost;
         protected Street street;
         private int[] rentPerBuildingsNum;
+        GameObject house;
         //  bool ownedByOnePlayer;
         public override string ToString()
         {
@@ -375,10 +376,69 @@ namespace Assets.Script
         {
             this.numOfBuildings++;
             owner.Pay(this.GetBuildingCost());
+            Allocate(numOfBuildings-1);
             //placeBuildig()
         }
+        private void Allocate(int houseIndex)
+        {
+            if (house != null)
+                GameObject.Destroy(house);
+            house =  GameObject.Instantiate(GameAssets.GetInstance().houses[houseIndex]);
+            Transform transform = house.transform;
+            float y = 1.5F;
+            int i = this.id;
+            if (i == 0)
+            { }
+            else
+            {
+                if (i < 10)
+                {
+                    //transform.position = vector + new Vector3( -1.9F * i,0);
+                    transform.position = new Vector3(1.62F - (1.9F * (i - 1)), y, -2.9f);
+                }
+                else
+                {
+                    if (i == 10)
+                    {
+                       
+                    }
+                    else
+                    {
+                        if (i < 20)
+                        {
+                            transform.position = new Vector3(-15f, y, (float)(-1.7f + (float)((i % 10 - 1) * 1.9)));
+                        }
+                        else
+                        {
+                            if (i == 20)
+                            {
+                                transform.position = new Vector3(-16f, y, 16f);
+                            }
+                            else
+                            {
+                                if (i < 30)
+                                {
+                                    transform.position = new Vector3(-13.7f + (float)((i % 10 - 1) * 2f), y, 15.2f);
+                                }
+                                else
+                                {
+                                    if (i == 30)
+                                    {
+                                        transform.position = new Vector3(5f, y, 15f);
 
-       
+                                    }
+                                    else
+                                    {
+                                        transform.position = new Vector3(3.25f, y, (float)(14f - (float)((i % 10 - 1) * 1.9)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
     }
 
     public class TrainSquare : PropertySquare

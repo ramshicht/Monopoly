@@ -16,7 +16,8 @@ public class GameAssets : MonoBehaviour {
     public GameObject bankruptButton;
     public Sprite[] Dices;
     internal object buyHouseButton;
-    public Button[] squareButtons = new Button[28];
+    public GameObject[] houses;
+
 
     public static GameAssets GetInstance()
     {

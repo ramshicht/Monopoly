@@ -47,7 +47,10 @@ public class Player :MonoBehaviour
         Debug.Log("hello");
         pos += steps;
         if (pos > 39)
+        {
             AddMoney(200);
+            isFirstRound = false;
+        }
         pos %= 40;
         Allocate(pos);
         Debug.Log(transform.position);
