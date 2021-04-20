@@ -1,0 +1,84 @@
+﻿[
+  {
+    "message": "COMMUNITY CHEST\r\nAdvance to \"Go\". (Collect $200)",
+    "pos": 0,
+    "kind": 0
+  },
+  {
+    "message": "COMMUNITY CHEST\r\nBank error in your favor.\r\n(Collect $200)",
+    "kind": 2,
+    "money": 200
+  },
+  {
+    "message": "COMMUNITY CHEST\r\nDoctor's fees. Pay $50.",
+    "kind": 9,
+    "money": 50
+  },
+  {
+    "message": "COMMUNITY CHEST\r\nFrom sale of stock you get $50.",
+    "kind": 2,
+    "money": 50
+  },
+  {
+    "message": "COMMUNITY CHEST\r\nGet Out of Jail Free.",
+    "kind": 3
+  },
+  {
+    "message": "COMMUNITY CHEST\r\nGo to Jail.\r\nGo directly to Jail.\r\nDo not pass GO, Do not collect $200.",
+    "kind": 5
+  },
+  {
+    "message": "COMMUNITY CHEST\r\nGrand Opera Night.\r\nCollect $50 from every player for opening night seats.",
+    "kind": 10,
+    "money": 50
+  },
+  {
+    "message": "COMMUNITY CHEST\r\nHoliday Fund matures.\r\nReceive $100.",
+    "kind": 2,
+    "money": 100
+  },
+  {
+    "message": "COMMUNITY CHEST\r\nIncome tax refund.\r\nCollect $20.",
+    "kind": 2,
+    "money": 20
+  },
+  {
+    "message": "COMMUNITY CHEST\r\nIt is your birthday.\r\n Collect $10 from every player.",
+    "kind": 10,
+    "money": 10
+  },
+  {
+    "message": "COMMUNITY CHEST\r\nLife insurance matures.\r\n Collect $100",
+    "kind": 2,
+    "money": 100
+  },
+  {
+    "message": "COMMUNITY CHEST\r\nHospital Fees.\r\nPay $50",
+    "kind": 9,
+    "money": 50
+  },
+  {
+    "message": "COMMUNITY CHEST\r\nSchool fees.\r\nPay $50.",
+    "kind": 9,
+    "money": 50
+  },
+  {
+    "message": "COMMUNITY CHEST\r\nReceive $25 consultancy fee.",
+    "kind": 2,
+    "money": 25
+  },
+  {
+    "message": "COMMUNITY CHEST\r\nYou are assessed for street repairs:\r\n Pay $40 per house\r\n and $115 per hotel you own.",
+    "kind": 8
+  },
+  {
+    "message": "COMMUNITY CHEST\r\nYou have won second prize in a beauty contest.\r\n Collect $10.",
+    "kind": 2,
+    "money": 10
+  },
+  {
+    "message": "COMMUNITY CHEST\r\nYou inherit $100.",
+    "kind": 2,
+    "money": 100
+  }
+]

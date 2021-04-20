@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Assets.Script;
+using UnityEngine.UI;
 
 public class Player :MonoBehaviour
 {
+    
     [SerializeField]
     private string playerName;
     int id;
@@ -23,7 +25,8 @@ public class Player :MonoBehaviour
     public int doublesCount;
     public bool active;
     [SerializeField]
-    public bool isFirstRound; 
+    public bool isFirstRound;
+    public int getOutOfJailCount;
     public Player(string playerName)
     {
         this.playerName = playerName;
@@ -41,23 +44,40 @@ public class Player :MonoBehaviour
         pos = 0;
         active = true;
         isFirstRound = true;
+        getOutOfJailCount = 0;
     }
     public void Move(int steps)
     {
-        Debug.Log("hello");
         pos += steps;
         if (pos > 39)
         {
             AddMoney(200);
+            Debug.Log(name + " passed throw GO and recieved $200");//update
             isFirstRound = false;
         }
         pos %= 40;
         Allocate(pos);
-        Debug.Log(transform.position);
+    }
+    public void SetMoney(int money)
+    {
+        this.money = money;
+        ChangeMoney();
     }
     public void MoveTo(int pos)
     {
+        if (pos < this.pos)
+        {
+            AddMoney(200);
+            Debug.Log(name + " passed throw GO and recieved $200");//update
+        }
         this.pos = pos;
+        Allocate(pos);
+        
+    }
+    public void SendThreeStepsBack()
+    {
+        this.pos -= 3;
+        Allocate(pos);
     }
     public int GetMoney()
     {
@@ -74,6 +94,7 @@ public class Player :MonoBehaviour
     public void AddMoney(int money)
     {
         this.money += money;
+        ChangeMoney();
     }
     public bool CanPay(int debt)
     {
@@ -84,50 +105,13 @@ public class Player :MonoBehaviour
     public int Pay(int money)
     {
         this.money -= money;
+        ChangeMoney();
+        Debug.Log(this.money);
         return money;
-    }
-    public void BuySomething(PropertySquare s, string caption)
-    {
-        switch (caption)
-        {
-            case "Property":
-                if (CanPay(s.GetCost()))
-                {
-                    Pay(s.GetCost());
-                    // s.ChangeOwner(this);
-                }
-                break;
-            case "Building":
-                if (CanPay(s.GetStreet().GetBuildingCost()))
-                    Pay(s.GetCost());
-                break;
-
-            default:
-                break;
-        }
     }
     public int GetPos()
     {
         return pos;
-    }
-    private Pose GetLocation(int pos)
-    {
-        int line = pos / 10;
-        int i = pos - line * 10;
-        Pose pose = new Pose();
-        Debug.Log(i);
-        switch (line)
-        {
-            case 0:
-                pose.position = new Vector3((float)(i * -1.5), (float)0.5, 0);
-               // pose.rotation = new Quaternion((float)-90, 0, (float)-90, 0);
-                break;
-            default:
-                pose.position = new Vector3((float)(0), (float)0.5, 0);
-              //  pose.rotation = new Quaternion((float)-90, 0, (float)-90, 0);
-                break;
-        }
-        return pose;
     }
     public void Bankrupt()
     {
@@ -135,9 +119,28 @@ public class Player :MonoBehaviour
         {
             square.Mortgage();
         }
-        this.money = -1;
+        SetMoney(-1);
+        ChangeMoney();
         active = false;
+        
 
+    }
+    private void ChangeMoney()
+    {
+        List<Player> list = new List<Player>();
+        int index=1;
+        foreach (GameObject go in GameHandler.GetInstance().players)
+        {
+            if (go.GetComponent<Player>() == this)
+                break;
+            index++;
+        }
+        Text money = GameObject.Find("money" + index.ToString()).GetComponent<Text>();
+        money.text = this.money.ToString();
+        if (this.money <= 0)
+            money.color = Color.red;
+        else
+            money.color = Color.black;
     }
     private void Allocate(int i)
     {
@@ -152,7 +155,6 @@ public class Player :MonoBehaviour
         {
             if (i < 10)
             {
-                //transform.position = vector + new Vector3( -1.9F * i,0);
                 transform.position = new Vector3(1.6F - (1.9F * (i - 1)),y,-4.2f);
             }
             else
@@ -201,17 +203,51 @@ public class Player :MonoBehaviour
     {
         GoToJail();
     }
-    private void GoToJail()
+    public void GoToJail()
     {
-        //Wait(5);
+       
         transform.position = new Vector3(-15f,1.5f, -4f);
         jailCount = 3;
         pos = 10;
+        Debug.Log(playerName + " sent to jail!");//update;
     }
-    private IEnumerable Wait(int secs)
-    { 
-        yield return new WaitForSeconds(secs);
+    public Vector2Int CountHousesAndHotels()
+    {
+        Vector2Int count = new Vector2Int();
+        foreach (PropertySquare ps in props)
+        {
+            if (ps.GetNumOfBuildings() == 5)
+                count.y++;
+            else
+                count.x += ps.GetNumOfBuildings();
+        }
+        return count;
     }
+    private IEnumerator Wait2(string type, int pos)
+    {
+        GameObject gameObject = GameObject.Find("DiceButton");
+        gameObject.GetComponent<Button>().enabled = false;
+        yield return new WaitForSeconds(1.5f);
+        switch (type)
+        {
+            case "Jail":
+                GoToJail();
+                break;
+            case "MoveTo":
+                MoveTo(pos);
+                break;
+            default:
+                SendThreeStepsBack();
+                break;
+        }
+        gameObject.GetComponent<Button>().enabled = true;
+
+    }
+    public void Wait(string type, int pos)
+    {
+        StartCoroutine(Wait2( type, pos));
+    }
+    
 
 }
 

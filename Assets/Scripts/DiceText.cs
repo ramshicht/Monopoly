@@ -5,10 +5,7 @@ using UnityEngine.UI;
 
 public class DiceText : MonoBehaviour {
     public Vector2Int dices;
-    private void Start()
-    {
-        
-    }
+
     public void ChangeText(Vector2Int dices)
     {
         int d1 = dices.x;
@@ -28,9 +25,5 @@ public class DiceText : MonoBehaviour {
         Image dice2 = GameObject.Find("Dice2").GetComponent<Image>();
         dice1.sprite =  GameAssets.GetInstance().Dices[d1 - 1];
         dice2.sprite = GameAssets.GetInstance().Dices[d2 - 1];
-       // SpriteRenderer dice1 = GameObject.Find("Dice1").GetComponent<SpriteRenderer>();
-        //SpriteRenderer dice2 = GameObject.Find("Dice2").GetComponent<SpriteRenderer>();
-        //dice1.sprite = GameAssets.GetInstance().Dices[d1 - 1];
-       // dice2.sprite = GameAssets.GetInstance().Dices[d2 - 1];
     }
 }

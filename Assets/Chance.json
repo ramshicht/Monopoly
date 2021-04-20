@@ -1,0 +1,82 @@
+﻿[
+    {
+      "message": "CHANCE\r\nAdvance to \"Go\". (Collect $200)",
+      "pos": 0,
+      "kind": 0
+    },
+  {
+    "message": "CHANCE\r\nAdvance to Illinois Ave. If you pass Go, collect $200",
+    "pos": 24,
+    "kind": 0
+  },
+  {
+    "message": "CHANCE\r\nAdvance to St. Charles Place. If you pass Go, collect $200.",
+    "pos": 11,
+    "kind": 0
+  },
+  {
+    "message": "CHANCE\r\nAdvance to St. Charles Place. If you pass Go, collect $200.",
+    "pos": 11,
+    "kind": 0
+  },
+  {
+    "message": "CHANCE\r\nAdvance to the nearest Railroad.\r\n If unowned, you may buy it from the Bank.\r\nIf owned, pay owner twice the retail to which they are otherwise entitled.\r\nIf Railroad is unowned, you may buy it from the Bank.",
+    "kind": 1
+  },
+  {
+    "message": "CHANCE\r\nAdvance to the nearest Railroad.\r\n If unowned, you may buy it from the Bank.\r\nIf owned, pay owner twice the retail to which they are otherwise entitled.\r\nIf Railroad is unowned, you may buy it from the Bank.",
+    "kind": 1
+  },
+  {
+    "message": "CHANCE\r\nBank pays you dividend of $50.",
+    "kind": 2,
+    "money": 50
+  },
+  {
+    "message": "CHANCE\r\nGet out of Jail Free.\r\nThis card may be kept until needed.",
+    "kind": 3
+  },
+  {
+    "message": "CHANCE\r\nGo Back Three 3 Spaces.",
+    "kind": 4
+  },
+  {
+    "message": "CHANCE\r\nGo to Jail.\r\nGo directly to Jail.\r\nDo not pass GO, Do not collect $200.",
+    "kind": 5
+  },
+  {
+    "message": "CHANCE\r\nMake general repairs on all your property:\r\n For each house pay $25, For each hotel pay $100.",
+    "kind": 6
+  },
+  {
+    "message": "CHANCE\r\nPay speeding fine of $15",
+    "kind": 9,
+    "money": 15
+  },
+  {
+    "message": "CHANCE\r\nTake a trip to Reading Railroad.\r\nIf you pass Go, collect $200.",
+    "pos": 5,
+    "kind": 0
+  },
+  {
+    "message": "CHANCE\r\nTake a walk on the Boardwalk.\r\nAdvance token to Boardwalk.",
+    "pos": 39,
+    "kind": 0
+  },
+  {
+    "message": "CHANCE\r\nYou have been elected Chairman of the Board.\r\n Pay each player $50.",
+    "kind": 7,
+    "money": 50
+  },
+  {
+    "message": "CHANCE\r\nYour building and loan matures.\r\n Receive $150.",
+    "kind": 2,
+    "money": 150
+  },
+  {
+    "message": "CHANCE\r\nYou have won a crossword competition.\r\nCollect $100",
+    "kind": 2,
+    "money": 100
+  }
+
+]

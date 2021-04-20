@@ -2,12 +2,48 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Assets.Script
 {
-    
+    //public class CardHandler
+    //{
+    //    public void DrawCard(Queue<CardRoot> queue, Player p)
+    //    {
+    //        CardRoot card = queue.Dequeue();
+    //        Square[] squares = GameHandler.GetInstance().squareInfo;
+    //        switch (card.kind)
+    //        {
+    //            case 0:
+    //                p.Move((p.GetPos()+(int)card.pos)%40);
+    //                squares[p.GetPos()].SteppedOn(p);
+    //                if (p.GetPos() == 0)
+    //                    p.SetMoney(p.GetMoney() - 200);
+    //                break;
+    //            case 1:
+    //                break;
+    //            case 2:
+    //                break;
+    //            case 3:
+    //                break;
+    //            case 4:
+    //                break;
+    //            case 5:
+    //                break;
+    //            case 6:
+    //                break;
+    //            case 7:
+    //                break;
+    //            case 8:
+    //                break;
+    //            default:
+    //                break;
+    //        }
+    //    }
+    //}
+   
     public enum Action
     {
         START_SQUARE,//0
@@ -59,10 +95,14 @@ namespace Assets.Script
             {
                 case Action.START_SQUARE:
                     player.AddMoney(200);
+                    
                     break;
                 case Action.CHANCE_SQUARE:
+                    GameHandler.GetInstance().DrawCard(true,player);
                     break;
                 case Action.COMMUNITY_BOX_SQUARE:
+                    //player.Wait(3);
+                    GameHandler.GetInstance().DrawCard(false, player);
                     break;
                 case Action.JAIL_SQUARE:
                     //Blank
@@ -71,7 +111,7 @@ namespace Assets.Script
                     player.freeParkingCount = 3;
                     break;
                 case Action.GOTO_JAIL_SQUARE:
-                    player.Jail();
+                    player.Wait("Jail",0);
                     break;
                 case Action.INCOME_TAX_SQUARE:
                     player.Pay(200);
@@ -113,7 +153,6 @@ namespace Assets.Script
         protected Street street;
         private int[] rentPerBuildingsNum;
         GameObject house;
-        //  bool ownedByOnePlayer;
         public override string ToString()
         {
             string str = base.ToString() + "\r\n" + "Base rent: " + rentByBuildingNum(0).ToString() + "\r\n";
@@ -185,7 +224,7 @@ namespace Assets.Script
         {
             this.cost = cost;
         }
-        public void SetMortgage(int mortgage)
+        protected void SetMortgage(int mortgage)
         {
             this.mortgageCost = mortgage;
         }
@@ -219,9 +258,11 @@ namespace Assets.Script
         public void Mortgage()
         {
             owner.RemoveProperty(this);
-            owner.AddMoney(mortgageCost);
+            owner.AddMoney(mortgageCost+numOfBuildings/2);
             SetNumOfBuildings(0);
             this.owner = null;
+            if (house != null)
+                GameObject.Destroy(house);
             ShowCard();
         }
         public void SetNumOfBuildings(int num)
@@ -260,12 +301,7 @@ namespace Assets.Script
             if ( owner != null && this.owner!=player)
             {
                 owner.AddMoney(player.Pay(this.RentCost()));
-                Debug.Log(player.name + "payed " + this.RentCost() + " to " + this.owner.name);
-            }
-            for (int i = 0; i < 6; i++)
-            {
-                
-                Debug.Log(i + ", " + rentPerBuildingsNum[i]);
+                Debug.Log(player.name + "payed " + this.RentCost() + " to " + this.owner.name);//update
             }
         }
         public void ChangeCurrentSquare(Player player)
@@ -376,10 +412,9 @@ namespace Assets.Script
         {
             this.numOfBuildings++;
             owner.Pay(this.GetBuildingCost());
-            Allocate(numOfBuildings-1);
-            //placeBuildig()
+            BuildHouse(numOfBuildings-1);
         }
-        private void Allocate(int houseIndex)
+        private void BuildHouse(int houseIndex)
         {
             if (house != null)
                 GameObject.Destroy(house);
