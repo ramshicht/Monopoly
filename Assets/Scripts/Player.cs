@@ -4,17 +4,16 @@ using UnityEngine;
 using Assets.Script;
 using UnityEngine.UI;
 
-public class Player :MonoBehaviour
+public class Player : MonoBehaviour
 {
-    
+    public bool isBot;
     [SerializeField]
     private string playerName;
     int id;
     [SerializeField]
     private int money;
     [SerializeField]
-    private List<PropertySquare> props;
-    //private Dictionary<int, List<PropertySquare>> props;
+    public List<PropertySquare> props;
     [SerializeField]
     public int jailCount;
     [SerializeField]
@@ -26,7 +25,9 @@ public class Player :MonoBehaviour
     public bool active;
     [SerializeField]
     public bool isFirstRound;
-    public int getOutOfJailCount;
+    public Dictionary<string, Street> streetsOwned;
+    public Dictionary<string, List<PropertySquare>> propertysInStreet;
+    public Queue<CardRoot> GetOutOfJailCards;
     public Player(string playerName)
     {
         this.playerName = playerName;
@@ -44,16 +45,24 @@ public class Player :MonoBehaviour
         pos = 0;
         active = true;
         isFirstRound = true;
-        getOutOfJailCount = 0;
+        GetOutOfJailCards = new Queue<CardRoot>();
+        streetsOwned =new Dictionary<string, Street>();
+        propertysInStreet = new Dictionary<string, List<PropertySquare>>();
+        string[] s = new string[] { "Utility", "Brown", "Green", "Cyan", "Blue", "Trains", "Red", "Pink", "Yellow", "Orange" };
+        for (int i = 0; i < s.Length; i++)
+        {
+            propertysInStreet.Add(s[i], new List<PropertySquare>());
+        }
     }
     public void Move(int steps)
     {
         pos += steps;
         if (pos > 39)
         {
+            GameHandler.GetInstance().audioSource.PlayOneShot(GameAssets.GetInstance().kidsCheering);
             AddMoney(200);
-            Debug.Log(name + " passed throw GO and recieved $200");//update
             isFirstRound = false;
+            GameHandler.GetInstance().PushMessage(name + " passed throw GO and recieved $200");
         }
         pos %= 40;
         Allocate(pos);
@@ -67,8 +76,10 @@ public class Player :MonoBehaviour
     {
         if (pos < this.pos)
         {
+            isFirstRound=false;
             AddMoney(200);
-            Debug.Log(name + " passed throw GO and recieved $200");//update
+            GameHandler.GetInstance().PushMessage(name + " passed throw GO and recieved $200");
+            GameHandler.GetInstance().audioSource.PlayOneShot(GameAssets.GetInstance().kidsCheering);
         }
         this.pos = pos;
         Allocate(pos);
@@ -76,7 +87,7 @@ public class Player :MonoBehaviour
     }
     public void SendThreeStepsBack()
     {
-        this.pos -= 3;
+        pos -= 3;
         Allocate(pos);
     }
     public int GetMoney()
@@ -86,10 +97,14 @@ public class Player :MonoBehaviour
     public void RemoveProperty(PropertySquare property)
     {
         props.Remove(property);
+        propertysInStreet[property.GetStreet().GetColor()].Remove(property);
     }
     public void AddProperty(PropertySquare property)
     {
         props.Add(property);
+        if (property.GetStreet().IsOwnedByOnePlayer(this))
+            streetsOwned.Add(property.GetStreet().GetColor(), property.GetStreet());
+        propertysInStreet[property.GetStreet().GetColor()].Add(property);
     }
     public void AddMoney(int money)
     {
@@ -102,11 +117,11 @@ public class Player :MonoBehaviour
             return true;
         return false;
     }
-    public int Pay(int money)
+    public int Pay(int money)// player pays 
     {
+        GameHandler.GetInstance().audioSource.PlayOneShot(GameAssets.GetInstance().cashSound);
         this.money -= money;
         ChangeMoney();
-        Debug.Log(this.money);
         return money;
     }
     public int GetPos()
@@ -122,7 +137,21 @@ public class Player :MonoBehaviour
         SetMoney(-1);
         ChangeMoney();
         active = false;
-        
+        int pCount = 0;
+        Player p = null;
+        foreach (GameObject go in GameHandler.GetInstance().players)
+        {
+            if (go.GetComponent<Player>().active)
+            {
+                p = go.GetComponent<Player>();
+                pCount++;
+            }
+        }
+        if (pCount==1)
+            GameHandler.GetInstance().ShowCard(p.name + "\r\nis The Winner!");
+        GameAssets.GetInstance().diceButton.GetComponent<Button>().onClick.RemoveAllListeners();
+        GameAssets.GetInstance().bankruptButton.GetComponent<Button>().onClick.RemoveAllListeners();
+
 
     }
     private void ChangeMoney()
@@ -205,7 +234,7 @@ public class Player :MonoBehaviour
     }
     public void GoToJail()
     {
-       
+        GameHandler.GetInstance().audioSource.PlayOneShot(GameAssets.GetInstance().policeSound);
         transform.position = new Vector3(-15f,1.5f, -4f);
         jailCount = 3;
         pos = 10;
@@ -223,31 +252,72 @@ public class Player :MonoBehaviour
         }
         return count;
     }
-    private IEnumerator Wait2(string type, int pos)
+    public void MoveToWithOutCollect(int pos)
+    {
+        this.pos = pos;
+        Allocate(pos);
+    }
+    private IEnumerator Wait2(string action, int pos, float time)
     {
         GameObject gameObject = GameObject.Find("DiceButton");
         gameObject.GetComponent<Button>().enabled = false;
-        yield return new WaitForSeconds(1.5f);
-        switch (type)
+        GameHandler gameHandler = GameHandler.GetInstance();
+        Square[] squareInfo = gameHandler.squareInfo;
+        yield return new WaitForSeconds(time);
+        switch (action)
         {
+            case "Send3":
+                SendThreeStepsBack();
+                squareInfo[this.pos].SteppedOn(this);
+                break;
             case "Jail":
                 GoToJail();
                 break;
             case "MoveTo":
                 MoveTo(pos);
+                squareInfo[pos].SteppedOn(this);
+                MoveTo(pos);
+                break;
+            case "MoveToRail":
+                MoveToWithOutCollect(pos);
+                squareInfo[pos].SteppedOn(this);
+                squareInfo[pos].SteppedOn(this);
                 break;
             default:
-                SendThreeStepsBack();
                 break;
         }
         gameObject.GetComponent<Button>().enabled = true;
-
     }
-    public void Wait(string type, int pos)
+    public void Wait(string type, int pos, float time)
     {
-        StartCoroutine(Wait2( type, pos));
+        
+        StartCoroutine(Wait2( type, pos, time));
+    }
+    public void BailFromJailUsingMoney()
+    {
+        if (CanPay(50))
+        {
+            Pay(50);
+            GameHandler.GetInstance().PushMessage(name + " bailed out of jail for $50");
+            jailCount = 0;
+            GameAssets.GetInstance().diceButton.GetComponent<Button>().onClick.RemoveAllListeners();
+            GameAssets.GetInstance().diceButton.GetComponentInChildren<Text>().text = "Toss";
+            GameAssets.GetInstance().diceButton.GetComponent<Button>().onClick.AddListener(() => { GameHandler.GetInstance().Toss(); });
+        }
+    }//pays 50 to bail out of jail
+    public void UseGetOutOfJailCard()//uses "Get Out Of Jail Card"
+    {
+        GameHandler.GetInstance().PushMessage(name + " \"use Get Out Of Jail Card\"");
+        jailCount = 0;
+        CardRoot card = GetOutOfJailCards.Dequeue();
+        if (card.message[1] == 'h')
+            GameHandler.GetInstance().chanceCards.Enqueue(card);
+        else
+            GameHandler.GetInstance().communityChestCards.Enqueue(card);
     }
     
+   
+     
 
 }
 

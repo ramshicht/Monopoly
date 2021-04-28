@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 using System.Runtime.CompilerServices;
+using Assets.Scripts;
 
 public class SquareRoot
 {
@@ -34,30 +35,47 @@ public class CardRoot
 
 
 public class GameHandler : MonoBehaviour {
+    public bool haveBot;
+    private Computer computer;
     public static GameHandler instance;
-    private static GameObject[] squares=new GameObject[40];
-    public static Square[] squareInfo=new Square[40];
-    private static Dictionary<string, Street> streetInfo=new Dictionary<string, Street>();
+    public Square[] squareInfo=new Square[40];
+    public Dictionary<string, Street> streetInfo=new Dictionary<string, Street>();
     public List<GameObject> players = new List<GameObject>();
     private static int TurnIndex;
     private int[] buttonsToSquares = new int[28];
-    public static Queue<CardRoot> chanceCards = new Queue<CardRoot>();
-    public static Queue<CardRoot> communityChestCards = new Queue<CardRoot>();
+    public Queue<CardRoot> chanceCards = new Queue<CardRoot>();
+    public Queue<CardRoot> communityChestCards = new Queue<CardRoot>();
+    public AudioSource audioSource;
+    private static System.Random random = new System.Random(Environment.TickCount);
+
     public static GameHandler GetInstance()
     {
         return instance;
-    }
+    }//returns this game handler object
     private void Start()
     {
         instance = this;
+        audioSource = GetComponent<AudioSource>();
         TurnIndex = 0;
-        //CreateSquares();
         UseSquares();
         SetCards();
         players.Add(Instantiate(GameAssets.GetInstance().dogPrefab));
         players.Add(Instantiate(GameAssets.GetInstance().carPrefab));
         players[0].GetComponent<Player>().name="Dog";
-        players[1].GetComponent<Player>().name = "Car";
+        if (StartMenuHandler.GetInstance().haveBot)
+        {
+            
+            players[1].GetComponent<Player>().name = "Bot Nick";
+            players[1].GetComponent<Player>().isBot = true;
+            Text text = GameObject.Find("name2").GetComponent<Text>();
+            text.text = "Bot Nick";
+            computer = new Computer(players[1].GetComponent<Player>());
+        }
+        else
+        {
+            players[1].GetComponent<Player>().name = "Car";
+        }
+        
         ChangeButtons();
         SetButtons();
         
@@ -87,10 +105,30 @@ public class GameHandler : MonoBehaviour {
         CardRoot[] communityChestArr = communityChestJson.ToArray();
         Shuffle<CardRoot>(random, communityChestArr);
         communityChestCards = new Queue<CardRoot>(communityChestArr);
-    }
-    public void DrawCard(bool Cardtype, Player p)
+    }//sets the Chance and Community ChestCards
+    public void PushMessage(string message)
     {
-        
+        string tmp1, contentName= "TextListContent ";
+        for (int i = 1; i <= 7; i++)
+        {
+            GameObject content = GameObject.Find(contentName + "(" + i + ")");
+            Text text = content.GetComponentInChildren<Text>();
+            content.GetComponent<Image>().enabled = true ;
+            if (text.text == "")
+            {
+                text.text = message;
+                break;
+            }
+            else
+            {
+                tmp1 = text.text;
+                text.text = message;
+                message = tmp1;
+            }
+        }
+    }//pushes message
+    public void DrawCard(bool Cardtype, Player p)//draws a Chance or Community Chest
+    {
         int money;
         Vector2Int count;
         bool load = true;
@@ -107,15 +145,14 @@ public class GameHandler : MonoBehaviour {
             type = "Community Chest";
         }
         CardRoot card = queue.Dequeue();
-        ShowCard(card);
+        ShowCard(card.message);
         switch (card.kind)
         {
             case 0:
-                if (p.GetPos() == 0)
+                if ((int)card.pos == 0)
                     p.SetMoney(p.GetMoney() - 200);
-                p.Wait("MoveTo", (int)card.pos);
-                squareInfo[p.GetPos()].SteppedOn(p);
-                Debug.Log(p.name + " was sent to " + squareInfo[p.GetPos()].GetSquareName() + " via " + type + " card");//update
+                p.Wait("MoveTo", (int)card.pos,1.5f);
+                PushMessage(p.name + " was sent to " + squareInfo[(int)card.pos].GetSquareName() + " via " + type + " card");
                 break;
             case 1:
                 int minRail=5;
@@ -130,27 +167,25 @@ public class GameHandler : MonoBehaviour {
                     }
                     rail += 10;
                 }
-                p.Wait("MoveTo", minRail);
-                squareInfo[minRail].SteppedOn(p);
-                squareInfo[minRail].SteppedOn(p);
-                Debug.Log(p.name + " was sent to " + squareInfo[minRail].GetSquareName() + " via " + type + " card");//update
+                p.Wait("MoveToRail", minRail,1.5f);
+                PushMessage(name + " was sent to nears railroad, " + squareInfo[minRail].GetSquareName() + " via " + type + " card");
                 break;
             case 2:
                 p.AddMoney((int)card.money);
-                Debug.Log(p.name + " was given " + card.money + " due " + type + " card");//update
+                PushMessage(p.name + " collected " + card.money + " due " + type + " card");
                 break;
             case 3:
-                p.getOutOfJailCount++;
+                p.GetOutOfJailCards.Enqueue(card);
                 load = false;
-                Debug.Log(p.name + " given a \" free out of jail card\"");//update
+                PushMessage(p.name + " collected a \" free out of jail card\"");
                 break;
             case 4:
-                p.Wait("", 0);
-                squareInfo[p.GetPos()].SteppedOn(p);
-                Debug.Log(p.name + " sent back 3 steps");//update
+                p.Wait("Send3", 0, 1.5f);
+                PushMessage(p.name + " sent 3 steps back");
                 break;
             case 5:
-                p.Wait("Jail", 0);
+                p.Wait("Jail", 0,1.5f);
+                PushMessage(p.name + " sent to jail via "+type + " card");
                 break;
             case 6:
                 money = 0;
@@ -158,15 +193,16 @@ public class GameHandler : MonoBehaviour {
                 money += count.x * 25 + count.y * 100;
                 p.Pay(money);
                 Debug.Log(p.name + " payed " + money + " due " + type + " card");//update
+                PushMessage(p.name + " payed " + money + " due " + type + " card");
                 break;
             case 7:
                 foreach (GameObject go in players)
                 {
                     Player player = go.GetComponent<Player>();
-                    if (player.active)
+                    if (player.active&&player!=p)
                     {
                         player.AddMoney(p.Pay((int)card.money));
-                        Debug.Log(p.name + " payed " + card.money + " to " + player.name);//update
+                        PushMessage(p.name + " payed " + card.money + " to " + player.name);
                     }
                 }
                 break;
@@ -175,20 +211,20 @@ public class GameHandler : MonoBehaviour {
                 count = p.CountHousesAndHotels();
                 money += count.x * 40 + count.y * 115;
                 p.Pay(money);
-                Debug.Log(p.name + " payed " + money + " via " + type + " card");//update
+                PushMessage(p.name + " payed " + money + " via " + type + " card");
                 break;
             case 9:
                 p.Pay((int)card.money);
-                Debug.Log(p.name + " payed " + card.money + " via " + type + " card");//update
+                PushMessage(p.name + " payed " + card.money + " via " + type + " card");
                 break;
             case 10:
                 foreach (GameObject go in players)
                 {
                     Player player = go.GetComponent<Player>();
-                    if (player.active)
+                    if (player.active && player != p)
                     {
                         p.AddMoney(player.Pay((int)card.money));
-                        Debug.Log(player.name + " payed " + card.money + " to " + p.name);//update
+                        PushMessage(player.name + " payed " + card.money + " to " + p.name);
                     }
                 }
                 break;
@@ -197,15 +233,13 @@ public class GameHandler : MonoBehaviour {
         }
         if (load)
             queue.Enqueue(card);
-        
-
     }
-    private void ShowCard(CardRoot cardRoot)
+    public void ShowCard(string s)//printing a message on the card block
     {
         GameObject card = GameObject.Find("Square_image");
         GameObject colorImage = GameObject.Find("Color_image");
         Text text = card.GetComponentInChildren<Text>();
-        text.text = cardRoot.message;
+        text.text = s;
         Image image = colorImage.GetComponent<Image>();
         Color color = image.color;
         Color color1;
@@ -222,7 +256,7 @@ public class GameHandler : MonoBehaviour {
             array[n] = array[k];
             array[k] = temp;
         }
-    }
+    }//shuffles array (used for shuffling cards)
     private void SetButtons()
     {
         //Button[] buttons = GameAssets.GetInstance().squareButtons;
@@ -241,7 +275,7 @@ public class GameHandler : MonoBehaviour {
                 });
             j++;
         }
-    }
+    }//sets the squares button to be clickable
     private void ChangeButtons()
     {
         int j = 0;
@@ -253,15 +287,16 @@ public class GameHandler : MonoBehaviour {
                 j++;
             }
         }
-    }
-    private void Toss()
+    }//helps "SetButtons"
+    public void Toss()//action of tossing dice inculding what happens after
     {
+        audioSource.PlayOneShot(GameAssets.GetInstance().diceSound);
         Player cPlayer = players[(TurnIndex%players.Count)].GetComponent<Player>();
-        System.Random random = new System.Random();
         int d1 = random.Next(1, 7);
         int d2 = random.Next(1, 7);
         Vector2Int dices = new Vector2Int(d1, d2);
         GameObject.Find("DiceText").GetComponent<DiceText>().ChangeText(dices);
+        ShowGetOutOfJailButton(false);
         if (cPlayer.GetPos()+dices.x+dices.y>40)
         {
             cPlayer.isFirstRound = false;
@@ -295,6 +330,7 @@ public class GameHandler : MonoBehaviour {
                         cPlayer.doublesCount = 0;
                         cPlayer.Jail();
                         canMove = false;
+                        PushMessage(cPlayer.name + " doubled 3 times in a row and sent to jail!");
                     }
                     else
                         TurnIndex--;
@@ -308,8 +344,8 @@ public class GameHandler : MonoBehaviour {
         if (canMove)
         {
             Move(cPlayer, dices);
-            Debug.Log(cPlayer.name + " landed on " + squareInfo[cPlayer.GetPos()].GetSquareName());
             squareInfo[cPlayer.GetPos()].SteppedOn(cPlayer);
+            
             if (cPlayer.jailCount != 0 && IsDoubleDice(dices)) 
                 TurnIndex++;
         }
@@ -317,11 +353,11 @@ public class GameHandler : MonoBehaviour {
         GameAssets.GetInstance().diceButton.GetComponent<Button>().onClick.RemoveAllListeners();
         GameAssets.GetInstance().diceButton.GetComponent<Button>().onClick.AddListener(PassTurn);
     }
-    private Player GetCurrentPlayer()
+    private Player GetCurrentPlayer()//returns the current player
     {
         return players[(TurnIndex % players.Count)].GetComponent<Player>();
     }
-    private void PassTurn()
+    public void PassTurn()//passing turn
     { 
         bool changed = false;
         if (TurnIndex==-1)
@@ -340,6 +376,7 @@ public class GameHandler : MonoBehaviour {
             Player cPlayer = players[(TurnIndex % players.Count)].GetComponent<Player>();
             if (!cPlayer.active)
                 PassTurn();
+           
             if (cPlayer.freeParkingCount > 0)
             {
                 cPlayer.freeParkingCount--;
@@ -347,38 +384,88 @@ public class GameHandler : MonoBehaviour {
             }
             else
             {
-                SetButtons();
                 TurnDot();
-                GameAssets.GetInstance().diceButton.GetComponent<Button>().onClick.RemoveAllListeners();
-                GameAssets.GetInstance().diceButton.GetComponentInChildren<Text>().text = "Toss";
-                GameAssets.GetInstance().diceButton.GetComponent<Button>().onClick.AddListener((Toss));
-
-                GameAssets.GetInstance().buySquareButton.GetComponent<Button>().enabled = false;
-                GameAssets.GetInstance().buildHouseButton.GetComponent<Button>().enabled = false;
-                GameAssets.GetInstance().bankruptButton.GetComponent<Button>().onClick.RemoveAllListeners();
-                GameAssets.GetInstance().bankruptButton.GetComponent<Button>().onClick.AddListener(() =>
+                if (cPlayer.isBot)
                 {
-                    cPlayer.active = false;
-                    cPlayer.Bankrupt();
-                    int playerCount=0;
-                    Player p=new Player("winner");
-                    foreach (GameObject go in players)
+                    computer.Play();
+                }
+                else
+                {
+                    SetButtons();
+                    GameAssets.GetInstance().diceButton.GetComponent<Button>().onClick.RemoveAllListeners();
+                    GameAssets.GetInstance().diceButton.GetComponentInChildren<Text>().text = "Toss";
+                    GameAssets.GetInstance().diceButton.GetComponent<Button>().onClick.AddListener((Toss));
+
+                    GameAssets.GetInstance().buySquareButton.GetComponent<Button>().enabled = false;
+                    GameAssets.GetInstance().buildHouseButton.GetComponent<Button>().enabled = false;
+                    GameAssets.GetInstance().bankruptButton.GetComponent<Button>().onClick.RemoveAllListeners();
+                    GameAssets.GetInstance().bankruptButton.GetComponent<Button>().onClick.AddListener(() =>
                     {
-                        if (go.GetComponent<Player>().active)
+                        cPlayer.active = false;
+                        cPlayer.Bankrupt();
+                        int playerCount = 0;
+                        Player p = new Player("winner");
+                        foreach (GameObject go in players)
                         {
-                            playerCount++;
-                            p = go.GetComponent<Player>();
+                            if (go.GetComponent<Player>().active)
+                            {
+                                playerCount++;
+                                p = go.GetComponent<Player>();
+                            }
                         }
-                    }
-                    if (playerCount==1)
+                        if (playerCount == 1)
+                        {
+                            EndMatch();
+                        }
+                        TurnIndex++;
+                    });
+                    if (cPlayer.jailCount!=0)
                     {
-                        Debug.Log(p.name + " is The Winner!");
-                        EndMatch();
+                        
+                        ShowGetOutOfJailButton(true);
+                       
+                        Button button = GameAssets.GetInstance().getOutOfJailButton.GetComponent<Button>();
+                        button.onClick.RemoveAllListeners();
+                        string message;
+                        if (cPlayer.GetOutOfJailCards.Count==0)
+                        {
+                            message = "You can bail out of jail for\r\n$50";
+                            button.onClick.AddListener(() =>
+                            {
+                                if (cPlayer.CanPay(50))
+                                {
+                                    cPlayer.BailFromJailUsingMoney();
+                                    ShowGetOutOfJailButton(false);
+                                    ShowCard("");
+                                }
+                            });
+                        }
+                        else
+                        {
+                            message = "You have \"Get Out Jail Card\"\r\nyou can use it if u like to";
+                            button.onClick.AddListener(() =>
+                            {
+                                cPlayer.UseGetOutOfJailCard();
+                                GameAssets.GetInstance().diceButton.GetComponent<Button>().onClick.RemoveAllListeners();
+                                GameAssets.GetInstance().diceButton.GetComponentInChildren<Text>().text = "Toss";
+                                GameAssets.GetInstance().diceButton.GetComponent<Button>().onClick.AddListener((Toss));
+                                ShowGetOutOfJailButton(false);
+                                ShowCard("");
+                            });
+                        }
+                        ShowCard(message);
+                        
                     }
-                    TurnIndex++;
-                });
+                }
             }
         }
+    }
+    private void ShowGetOutOfJailButton(bool active)//disable or enabled the Get Out Of Jail dialog
+    {
+        GameAssets.GetInstance().getOutOfJailButton.SetActive(active);
+        if (!active)
+            ShowCard("");
+        
     }
     private void TurnDot()
     {
@@ -389,20 +476,29 @@ public class GameHandler : MonoBehaviour {
         dots[i].GetComponent<Image>().enabled=true;
         dots.RemoveAt(TurnIndex%players.Count);
         dots[0].GetComponent<Image>().enabled = false;
-    }
+    }//moving the dot that show who's tuen right now
     private void EndMatch()
     {
+        foreach (GameObject go in players)
+        {
+            if (go.GetComponent<Player>().active)
+            {
+                PushMessage(go.GetComponent<Player>().name + " is The Winner!");
+                ShowCard(go.GetComponent<Player>().name + "\r\nis The Winner!");
+            }
+        }
+        
         GameAssets.GetInstance().diceButton.GetComponent<Button>().onClick.RemoveAllListeners();
         GameAssets.GetInstance().bankruptButton.GetComponent<Button>().onClick.RemoveAllListeners();
-    }
+    }//ending match
     private bool IsDoubleDice(Vector2Int dices)
     {
         return dices.y == dices.x;
-    }
+    }// return if the dices are equal
     private void Move(Player player, Vector2Int dices)
     {
         player.Move(dices.x + dices.y);
-    }
+    }// moves the player
     private void UseSquares()
     {
         string json;
@@ -466,5 +562,5 @@ public class GameHandler : MonoBehaviour {
                 }
             }
         }
-    }
+    }//set the squares and streets info
 }

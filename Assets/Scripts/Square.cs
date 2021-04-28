@@ -8,47 +8,11 @@ using UnityEngine.UI;
 
 namespace Assets.Script
 {
-    //public class CardHandler
-    //{
-    //    public void DrawCard(Queue<CardRoot> queue, Player p)
-    //    {
-    //        CardRoot card = queue.Dequeue();
-    //        Square[] squares = GameHandler.GetInstance().squareInfo;
-    //        switch (card.kind)
-    //        {
-    //            case 0:
-    //                p.Move((p.GetPos()+(int)card.pos)%40);
-    //                squares[p.GetPos()].SteppedOn(p);
-    //                if (p.GetPos() == 0)
-    //                    p.SetMoney(p.GetMoney() - 200);
-    //                break;
-    //            case 1:
-    //                break;
-    //            case 2:
-    //                break;
-    //            case 3:
-    //                break;
-    //            case 4:
-    //                break;
-    //            case 5:
-    //                break;
-    //            case 6:
-    //                break;
-    //            case 7:
-    //                break;
-    //            case 8:
-    //                break;
-    //            default:
-    //                break;
-    //        }
-    //    }
-    //}
-   
     public enum Action
     {
-        START_SQUARE,//0
+        GO_SQUARE,//0
         CHANCE_SQUARE, //1
-        COMMUNITY_BOX_SQUARE,//2
+        COMMUNITY_CHEST_SQUARE,//2
         JAIL_SQUARE,//3
         FREE_PARKING_SQUARE,//4
         GOTO_JAIL_SQUARE,//5
@@ -57,7 +21,6 @@ namespace Assets.Script
     }
     public abstract class Square
     {
-       
         protected int id;
         protected string squareName;
         public Square(int id, string squareName)
@@ -93,30 +56,33 @@ namespace Assets.Script
             ShowCard();
             switch (action)
             {
-                case Action.START_SQUARE:
+                case Action.GO_SQUARE:
                     player.AddMoney(200);
-                    
+                    GameHandler.GetInstance().PushMessage(player.name + " landed on GO and collected extra $200");
                     break;
                 case Action.CHANCE_SQUARE:
                     GameHandler.GetInstance().DrawCard(true,player);
                     break;
-                case Action.COMMUNITY_BOX_SQUARE:
+                case Action.COMMUNITY_CHEST_SQUARE:
                     //player.Wait(3);
                     GameHandler.GetInstance().DrawCard(false, player);
                     break;
                 case Action.JAIL_SQUARE:
-                    //Blank
+                    GameHandler.GetInstance().PushMessage(player.name + " visited at Jail");
                     break;
                 case Action.FREE_PARKING_SQUARE:
+                    GameHandler.GetInstance().PushMessage(player.name + " landed on free parking");
                     player.freeParkingCount = 3;
                     break;
                 case Action.GOTO_JAIL_SQUARE:
-                    player.Wait("Jail",0);
+                    player.Wait("Jail",0,1.5f);
                     break;
                 case Action.INCOME_TAX_SQUARE:
+                    GameHandler.GetInstance().PushMessage(player.name + " landed on Income Tax and payed $200");
                     player.Pay(200);
                     break;
                 case Action.LUXURY_TAX_SQUARE:
+                    GameHandler.GetInstance().PushMessage(player.name + " landed on Luxury Tax and payed $100");
                     player.Pay(100);
                     break;
                 default:
@@ -250,6 +216,7 @@ namespace Assets.Script
         {
             this.owner = player;
             player.AddProperty(this);
+            
         }
         public int GetNumOfBuildings()
         {
@@ -271,10 +238,18 @@ namespace Assets.Script
         }
         public bool Buy(Player player)
         {
+            if (player.isFirstRound)
+                return false;
+            if (this.IsOwned())
+                return false;
+
             if (player.CanPay(cost))
             {
-                ChangeOwner(player);
-                player.Pay(cost);
+                this.owner = player;
+                player.AddProperty(this);
+                player.Pay(this.cost);
+                GameHandler.GetInstance().PushMessage(player.name + " bought " + this.squareName);
+                ChangeCurrentSquare(player);
                 return true;
             }
             return false;
@@ -296,12 +271,13 @@ namespace Assets.Script
         }
        
         public override void SteppedOn(Player player)
-        {   
+        {
+            GameHandler.GetInstance().PushMessage(player.name + " landed on " + squareName);
             ChangeCurrentSquare(player);
             if ( owner != null && this.owner!=player)
             {
                 owner.AddMoney(player.Pay(this.RentCost()));
-                Debug.Log(player.name + "payed " + this.RentCost() + " to " + this.owner.name);//update
+                GameHandler.GetInstance().PushMessage(player.name + " payed " + this.RentCost() + " to " + this.owner.name);
             }
         }
         public void ChangeCurrentSquare(Player player)
@@ -329,12 +305,7 @@ namespace Assets.Script
                         {
                             if (player.CanPay(this.cost))
                             {
-                                this.owner = player;
-                                player.AddProperty(this);
-                                player.Pay(this.cost);
-                                //ShowCard();
-                                Debug.Log(player.name + " bought " + this.squareName);//message
-                                ChangeCurrentSquare(player);
+                                Buy(player);
                             }   
                             else
                             {
@@ -367,10 +338,10 @@ namespace Assets.Script
                         if (player.CanPay(this.GetBuildingCost()))
                         {
                             BuildNewHouse();
-                            if (numOfBuildings!=5)
-                                Debug.Log(player.name + " built house in " + this.squareName);//message
+                            if (numOfBuildings != 5)
+                                GameHandler.GetInstance().PushMessage(player.name + " built house in " + this.squareName);
                             else
-                                Debug.Log(player.name + " built hotel in " + this.squareName);//message
+                                GameHandler.GetInstance().PushMessage(player.name + " built hotel in " + this.squareName);
                         }
                     }
                     else
@@ -392,7 +363,7 @@ namespace Assets.Script
                 GameAssets.GetInstance().mortageButton.GetComponent<Button>().onClick.AddListener(() =>
                 {
                     Mortgage();
-                    Debug.Log(player.name + " mortaged " + this.squareName);//message
+                    GameHandler.GetInstance().PushMessage(player.name + " mortaged " + this.squareName);
                     ChangeCurrentSquare(player);
                 });
             }
@@ -404,11 +375,11 @@ namespace Assets.Script
                 });
             }
         }
-        private int GetBuildingCost()
+        public int GetBuildingCost()
         {
             return street.GetBuildingCost();
         }
-        private void BuildNewHouse()
+        public void BuildNewHouse()
         {
             this.numOfBuildings++;
             owner.Pay(this.GetBuildingCost());
@@ -428,7 +399,6 @@ namespace Assets.Script
             {
                 if (i < 10)
                 {
-                    //transform.position = vector + new Vector3( -1.9F * i,0);
                     transform.position = new Vector3(1.62F - (1.9F * (i - 1)), y, -2.9f);
                 }
                 else
@@ -520,16 +490,16 @@ namespace Assets.Script
         {
 
             base.ChangeCurrentSquare(player);
-            GameAssets.GetInstance().buildHouseButton.GetComponent<Button>().enabled = false;
+            
             if (this.owner != null && this.owner.name != player.name)
             {
                 player.Pay(this.RentCost());
-                Debug.Log(player.name + " payed " + this.RentCost() + " to " + this.owner.name);//message
+                GameHandler.GetInstance().PushMessage(player.name + " payed " + this.RentCost() + " to " + this.owner.name);
             }
             GameAssets.GetInstance().buildHouseButton.GetComponent<Button>().onClick.RemoveAllListeners();
             GameAssets.GetInstance().buildHouseButton.GetComponent<Button>().onClick.AddListener(() =>
             {
-                Debug.Log("You cant buy house in Utility Squares");
+                Debug.Log("You cant buy house in RailRoads");
             });
 
         }
@@ -556,13 +526,13 @@ namespace Assets.Script
             GameAssets.GetInstance().buildHouseButton.GetComponent<Button>().onClick.RemoveAllListeners();
             GameAssets.GetInstance().buildHouseButton.GetComponent<Button>().onClick.AddListener(() =>
             {
-                Debug.Log("You cant buy house in RailRoads");
+                Debug.Log("You cant buy house in Utility Squares");
             });
             if (this.owner!=null&&this.owner.name!=player.name)
             {
                 Vector2Int dices= GameAssets.GetInstance().diceText.GetComponent<DiceText>().dices;
                 player.Pay(this.RentCost(dices.x+dices.y));
-                Debug.Log(player.name + " payed " + RentCost(dices.x+dices.y).ToString() + " to " + this.owner.name);//message
+                GameHandler.GetInstance().PushMessage(player.name + " payed " + RentCost(dices.x + dices.y).ToString() + " to " + this.owner.name);
             }
         }
         public override string ToString()
@@ -585,7 +555,7 @@ namespace Assets.Script
 
     public class Street
     {
-        List<PropertySquare> props;
+        public List<PropertySquare> props;
         string streetColor;
         int buildingCost;
         public Street(string streetColor, int buildingCost)
@@ -639,10 +609,41 @@ namespace Assets.Script
         {
             return this.streetColor;
         }
+        public bool IsOwnedBytwoPlayers()
+        {
+            Player[] players = new Player[2];
+            int i = 0;
+            foreach (PropertySquare ps in props)
+            {
+                if (ps.GetOwner()!=null)
+                {
+                    if (ps.GetOwner() != players[0])
+                    {
+                        players[i++] = ps.GetOwner();
+                        if (i == 2)
+                            return true;
+                    }
+                }
+            }
+            return false;
+        }
+        public bool IsOwnedBy(Player player)
+        {
+            foreach (PropertySquare ps in props)
+            {
+                if (ps.GetOwner() == player)
+                    return true;
+            }
+            return false;
+        }
+        public bool NoOwners()
+        {
+            foreach (PropertySquare ps in props)
+            {
+                if (ps.GetOwner() != null)
+                    return false;
+            }
+            return true;
+        }
     }
 }
-
-
-
-   
-

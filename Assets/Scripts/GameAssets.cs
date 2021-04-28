@@ -17,6 +17,11 @@ public class GameAssets : MonoBehaviour {
     public Sprite[] Dices;
     internal object buyHouseButton;
     public GameObject[] houses;
+    public AudioClip cashSound;
+    public AudioClip diceSound;
+    public AudioClip policeSound;
+    public AudioClip kidsCheering;
+    public GameObject getOutOfJailButton;
 
 
     public static GameAssets GetInstance()
